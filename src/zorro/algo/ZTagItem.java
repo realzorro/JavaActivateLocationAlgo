@@ -361,8 +361,8 @@ public class ZTagItem {
 		{
 			int nStepC = GetStepChange();
 			if (nStepC > 0) {
-				DX = (float) (Math.sin(DirectAngle * 3.1416 / 180) * nStepC * 0.3f) + DX * 0.2f;
-				DY = (float) (Math.cos(DirectAngle * 3.1416 / 180) * nStepC * 0.3f) + DY * 0.2f;
+				DX = (float) (Math.sin(DirectAngle * 3.1416 / 180) * nStepC * 0.52f) + DX * 0.2f;
+				DY = (float) (Math.cos(DirectAngle * 3.1416 / 180) * nStepC * 0.52f) + DY * 0.2f;
 			}
 		}
 		
