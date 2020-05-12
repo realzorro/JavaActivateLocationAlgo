@@ -32,6 +32,8 @@ public class ZTagItem {
 
 	int m_TrendUp;
 
+	float m_LastAngle;
+	
 	public ZTagItem(String MacAddr, ZDeviceMgr pDeviceMgr) {
 		m_TagMAC = MacAddr;
 		m_Pos = new ZPosition(MacAddr, 0, 0, 0);
@@ -52,6 +54,8 @@ public class ZTagItem {
 		m_LastStepTime = 0;
 
 		m_TrendUp = 0;
+		
+		m_LastAngle=-999f;
 	}
 
 	public void AddNewRssi(String DeviceMac, String TagMac, float fRssi, long nTime) {
@@ -307,6 +311,9 @@ public class ZTagItem {
 	}
 
 	private void OptimizeStep(float DirectAngle) {
+		if( m_LastAngle==-999f )
+			m_LastAngle=DirectAngle;
+		
 		if (m_MoveStill==1)
 		{
 			ZLog.pl("Tag Still! No Optimize");
@@ -359,12 +366,22 @@ public class ZTagItem {
 
 		if(ZConfig.TREND_SWITCH)
 		{
-			int nStepC = GetStepChange();
+			float StepFactor=0;
+			float AngleChange=Math.abs(DirectAngle-m_LastAngle);
+			if(AngleChange>180)
+			{
+				AngleChange=360-AngleChange;
+			}
+			StepFactor=(180-AngleChange)/180;
+			
+			float nStepC = GetStepChange();
 			if (nStepC > 0) {
-				DX = (float) (Math.sin(DirectAngle * 3.1416 / 180) * nStepC * 0.52f) + DX * 0.2f;
-				DY = (float) (Math.cos(DirectAngle * 3.1416 / 180) * nStepC * 0.52f) + DY * 0.2f;
+				DX = (float) (Math.sin(DirectAngle * 3.1416 / 180) * nStepC * 0.44f * StepFactor) + DX * 0.33f;
+				DY = (float) (Math.cos(DirectAngle * 3.1416 / 180) * nStepC * 0.44f * StepFactor) + DY * 0.33f;
 			}
 		}
+		
+		m_LastAngle=DirectAngle;
 		
 		ZLog.pl("OffSet:  CX- "+DX+" CY-"+DY);
 		
@@ -430,8 +447,8 @@ public class ZTagItem {
 		ZLog.pl("MoveFlag-"+m_MoveFlag+"  TrendUp-"+m_TrendUp+"  Still-"+m_MoveStill+"\r\n");
 	}
 
-	public int GetStepChange() {
-		int nVal = m_StepNow - m_LastStep;
+	public float GetStepChange() {
+	    float nVal =(float)(m_StepNow - m_LastStep);
 
 		m_LastStep = m_StepNow;
 		m_LastStepTime = ZApi.GetUnixMillis();
